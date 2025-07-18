@@ -33,3 +33,15 @@ delayed_percent = round(delayed_flights / total_flights * 100, 1)
 
 print(f"Total flights: {total_flights}")
 print(f"Flights delayed: {delayed_flights} ({delayed_percent}%)")
+
+# count number of fligts with each delay type
+delay_counts = {}
+for col in existing_delay_cols:
+    if col == "depdelay":
+        delay_counts[col] = delayed_flights
+        continue
+    delay_counts [col] = (data[col] > 0).sum()
+
+print("Delay by reason:")
+for k, v in delay_counts.items():
+    print(f"{k}: {v}")

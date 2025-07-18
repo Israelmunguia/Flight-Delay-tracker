@@ -45,3 +45,15 @@ for col in existing_delay_cols:
 print("Delay by reason:")
 for k, v in delay_counts.items():
     print(f"{k}: {v}")
+
+#bar chart of delay reasons
+if delay_counts:
+    reasons = list(delay_counts.keys())
+    counts = [delay_counts[r] for r in reasons]
+
+    plt.bar(reasons,counts)
+    plt.title("Number of Flihts by Delay Reason- Israel Munguia")
+    plt.ylabel("Count of Flights")
+    plt.xticks(rotation=30, ha="right")
+    plt.tight_layout()
+    plt.show()

@@ -11,6 +11,16 @@ data = pd.read_csv(file_name, low_memory=False)
 #make columns lowercase so i don't worry about capital letters
 data.columns = [c.lower() for c in data.columns]
  
+if "crsdeptime" in data.columns:
+    crs_raw = pd.to_numeric(data["crsdeptime"], errors="coerce").fillna(0).astype(int)
+    crs_str = crs_raw.astype(str).str.zfill(4)
+    data["hour"] = crs_str.str[:2].astype(int).clip(0, 23)
+    data["minute"] = crs_str.str[2:].astype(int).clip(0, 59)
+    data["hhmm_label"] = (
+        data["hour"].astype(str).str.zfill(2)
+        + ":" +
+        data["minute"].astype(str).str.zfill(2)
+    )
 #delay columns to analyze
 delay_cols = [
     'depdelay',
@@ -35,7 +45,7 @@ delayed_percent = round(delayed_flights / total_flights * 100, 1)
 print(f"Total flights: {total_flights}")
 print(f"Flights delayed: {delayed_flights} ({delayed_percent}%)")
 
-# count number of fligts with each delay type
+# count number of flights with each delay type
 delay_counts = {}
 for col in existing_delay_cols:
     if col == "depdelay":
@@ -75,10 +85,11 @@ if delay_counts:
         print("No specific delay causes to plot.")
 
 
-#heatmap: average departure delay by hour and weekday
+#Heatmap: average departure delay by hour and weekday
 if "depdelay" in data.columns and "crsdeptime" in data.columns and "dayofweek" in data.columns:
+    show_cell_numbers = True
+    
     data["crsdeptime"] = pd.to_numeric(data["crsdeptime"], errors="coerce").fillna(0).astype(int)
-    data["hour"] = (data["crsdeptime"] // 100).clip(lower=0, upper=23)
     data["weekday"] = pd.to_numeric(data["dayofweek"], errors="coerce").fillna(0).astype(int)
 
     pivot = data.pivot_table(
@@ -92,14 +103,33 @@ if "depdelay" in data.columns and "crsdeptime" in data.columns and "dayofweek" i
     pivot = pivot.reindex(range(24), fill_value=0)
     pivot = pivot.reindex(columns=[1, 2, 3, 4, 5, 6, 7], fill_value=0)
 
-    plt.imshow(pivot.values, origin="lower", aspect="auto")
-    plt.colorbar(label="Avg Dep Delay (min)")
-    plt.xlabel("Weekday (1=Mon ... 7=Sun)")
-    plt.ylabel("Hour of Day (0-23)")
-    plt.title("Avg Departure Delay by Hour & Weekday")
-    plt.xticks(ticks=range(7), labels=[1, 2, 3, 4, 5, 6, 7])
-    plt.yticks(ticks=range(24), labels=range(24))
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(8,6))
+    img = ax.imshow(pivot.values , origin="lower", aspect="auto", cmap="viridis")
+
+    cbar = fig.colorbar(img, ax=ax)
+    cbar.set_label("Avg Dep Delay (min)", rotation=270, labelpad=20)
+
+    ax.set_title("Average Departure Delay by Hour & Weekday")
+    ax.set_xlabel("Weekday (1=Mon ... 7=Sun)")
+    ax.set_ylabel("Hour of Day (0–23)")
+    ax.set_xticks(range(7))
+    ax.set_xticklabels([1, 2, 3, 4, 5, 6, 7])
+    ax.set_yticks(range(24))
+    ax.set_yticklabels(range(24))
+
+    if show_cell_numbers:
+        mid = (pivot.values.max() + pivot.values.min()) / 2  # midpoint for contrast
+        for i, hour in enumerate(pivot.index):
+            for j, wd in enumerate(pivot.columns):
+                val = pivot.iloc[i, j]
+                # Show all values (change to: if val > 0:  to hide zeros)
+                color = "white" if val >= mid else "black"
+                ax.text(j, i, f"{val:.0f}", ha="center", va="center",
+                        fontsize=8, color=color)
+    fig.tight_layout()
+    
     plt.show()
+    plt.close(fig)
+
 else:
     print("\nSkipping heatmap (missing one of: depdelay, crsdeptime, dayofweek)")

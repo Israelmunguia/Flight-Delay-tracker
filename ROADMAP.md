@@ -6,18 +6,18 @@
 - [x] Download database
 ### Environment & Tools
 - [x]Create and activate virtual environment (python -m venv .venv)
--[x]Install core libraries: pandas, matplotlib (add others later)
--[x] Verify script runs
--[x]First commits pushed (at least 2–3 small commits)
+- [x]Install core libraries: pandas, matplotlib (add others later)
+- [x] Verify script runs
+- [x]First commits pushed (at least 2–3 small commits)
 ### Planning
--[x] Define initial goal:“Summarize basic delay reasons and visualize them.”
--[x] List core data columns needed (depdelay, carrierdelay, etc.)
+- [x] Define initial goal:“Summarize basic delay reasons and visualize them.”
+- [x] List core data columns needed (depdelay, carrierdelay, etc.)
 ### Data Handling
--[x] Place raw CSV in input/ folder
--[x] Write basic load script (flight_delay_analysis.py)
--[] Lowercase all column names
--[] Identify which expected delay columns actually exist
--[] Handle missing values in delay columns (fill with 0)
--[] Convert delay columns to integer safely
--[] Decide how to treat negative departure delays (clip to 0)
--[] Add simple error message if file not found or columns missing
+- [x] Place raw CSV in input/ folder
+- [x] Write basic load script (flight_delay_analysis.py)
+- [x] Lowercase all column names
+- [x] Identify which expected delay columns actually exist
+- [x] Handle missing values in delay columns (fill with 0)
+- [x] Convert delay columns to integer safely
+- [x] Decide how to treat negative departure delays (clip to 0)
+- [x] Add simple error message if file not found or columns missing

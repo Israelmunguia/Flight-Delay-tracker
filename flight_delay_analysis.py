@@ -57,3 +57,32 @@ if delay_counts:
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout()
     plt.show()
+
+#heatmap: average departure delay by hour and weekday
+if "depdelay" in data.columns and "crsdeptime" in data.columns and "dayofweek" in data.columns:
+    data["crsdeptime"] = pd.to_numeric(data["crsdeptime"], errors="coerce").fillna(0).astype(int)
+    data["hour"] = (data["crsdeptime"] // 100).clip(lower=0, upper=23)
+    data["weekday"] = pd.to_numeric(data["dayofweek"], errors="coerce").fillna(0).astype(int)
+
+    pivot = data.pivot_table(
+        index="hour",
+        columns="weekday",
+        values="depdelay",
+        aggfunc="mean",
+        fill_value=0
+    )
+
+    pivot = pivot.reindex(range(24), fill_value=0)
+    pivot = pivot.reindex(columns=[1, 2, 3, 4, 5, 6, 7], fill_value=0)
+
+    plt.imshow(pivot.values, origin="lower", aspect="auto")
+    plt.colorbar(label="Avg Dep Delay (min)")
+    plt.xlabel("Weekday (1=Mon ... 7=Sun)")
+    plt.ylabel("Hour of Day (0-23)")
+    plt.title("Avg Departure Delay by Hour & Weekday")
+    plt.xticks(ticks=range(7), labels=[1, 2, 3, 4, 5, 6, 7])
+    plt.yticks(ticks=range(24), labels=range(24))
+    plt.tight_layout()
+    plt.show()
+else:
+    print("\nSkipping heatmap (missing one of: depdelay, crsdeptime, dayofweek)")
